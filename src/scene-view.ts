@@ -9,6 +9,11 @@ import { assetUrl } from './scene-manifests.ts';
 import type { SceneManifest } from './scene-manifests.ts';
 import type { SceneWeather } from './weather.ts';
 
+const renderProfiles = {
+  baseline: { scale: .68, maxWidth: 1100, maxHeight: 700 },
+  detailed: { scale: .82, maxWidth: 1280, maxHeight: 800 },
+};
+
 function disposeModel(model: Object3D): void {
   const geometries = new Set<Mesh['geometry']>();
   const materials = new Set<Material>();
@@ -44,17 +49,20 @@ export class SceneView {
   private frame = 0;
   private lastFrame?: number;
   private slowFrames = 0;
-  private resolutionScale = .68;
+  private resolutionScale: number;
   private time = 0;
   private generation = 0;
   private paused = false;
   private lost = false;
+  private ghostDisplay = false;
 
   constructor(
     private readonly container: HTMLElement,
     private readonly poster: HTMLImageElement,
     private readonly onFrame?: (elapsed: number | undefined) => void,
+    private readonly profile: keyof typeof renderProfiles = 'detailed',
   ) {
+    this.resolutionScale = renderProfiles[profile].scale;
     this.container.dataset.renderer = 'still';
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('webgl2', { alpha: false, antialias: false });
@@ -96,7 +104,7 @@ export class SceneView {
     const generation = ++this.generation;
     this.manifest = manifest;
     this.cancelFrame();
-    this.resolutionScale = .68;
+    this.resolutionScale = renderProfiles[this.profile].scale;
     this.slowFrames = 0;
     this.updatePoster();
     this.showStill();
@@ -136,6 +144,13 @@ export class SceneView {
     this.requestFrame();
   }
 
+  setGhostDisplay(enabled: boolean): void {
+    this.ghostDisplay = enabled;
+    this.container.parentElement?.toggleAttribute('data-ghost-display', enabled);
+    this.resize();
+    this.requestFrame();
+  }
+
   private updatePoster(): void {
     if (!this.manifest) return;
     const portrait = this.container.clientWidth < this.container.clientHeight;
@@ -152,7 +167,7 @@ export class SceneView {
     const aspect = width / height;
     const camera = this.manifest.camera;
     const landscapeWidth = Math.max(camera.width, camera.width / 2.1 * aspect);
-    const halfWidth = (aspect < 1 ? camera.portraitWidth : landscapeWidth) / 2;
+    const halfWidth = (aspect < 1 ? camera.portraitWidth : landscapeWidth) * (this.ghostDisplay ? 1.08 : 1) / 2;
     const halfHeight = halfWidth / aspect;
     this.camera.left = -halfWidth;
     this.camera.right = halfWidth;
@@ -161,7 +176,8 @@ export class SceneView {
     this.camera.position.set(...camera.position);
     this.camera.lookAt(...camera.target);
     this.camera.updateProjectionMatrix();
-    const scale = Math.min(this.resolutionScale, 1100 / width, 700 / height);
+    const { maxWidth, maxHeight } = renderProfiles[this.profile];
+    const scale = Math.min(this.resolutionScale, maxWidth / width, maxHeight / height);
     this.renderer.setSize(Math.max(1, Math.floor(width * scale)), Math.max(1, Math.floor(height * scale)), false);
   }
 

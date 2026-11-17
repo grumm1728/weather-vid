@@ -25,7 +25,63 @@ const selectedFixture = query.get('fixture') ?? defaultFixture;
 const forcedFixture = query.has('fixture');
 const live = !forcedFixture && import.meta.env.VITE_WEATHER_MODE !== 'fixture';
 const sampleFrames = forcedFixture && query.get('benchmark') === '1' ? frameBenchmark() : undefined;
-const view = new SceneView(scene, poster, sampleFrames);
+const profile = forcedFixture && query.get('quality') === 'baseline' ? 'baseline' : 'detailed';
+const view = new SceneView(scene, poster, sampleFrames, profile);
+const display = document.querySelector<HTMLElement>('#display')!;
+const panel = document.querySelector<HTMLElement>('#weather-panel')!;
+const hide = document.querySelector<HTMLButtonElement>('#hide-controls')!;
+const show = document.querySelector<HTMLButtonElement>('#show-controls')!;
+const ghost = document.querySelector<HTMLInputElement>('#ghost')!;
+const openPreview = document.querySelector<HTMLAnchorElement>('#open-preview')!;
+const exitPreview = document.querySelector<HTMLAnchorElement>('#exit-preview')!;
+const previewScene = document.querySelector<HTMLSelectElement>('#preview-scene')!;
+const settings = document.querySelector<HTMLDetailsElement>('.display-panel')!;
+
+function syncLinks(): void {
+  const next = new URL(location.href);
+  next.search = query.toString();
+  history.replaceState(null, '', next);
+  next.searchParams.delete('fixture');
+  next.searchParams.delete('scene');
+  next.searchParams.delete('benchmark');
+  next.hash = '';
+  exitPreview.href = next.href;
+  next.searchParams.set('fixture', defaultFixture);
+  next.searchParams.set('scene', scene.dataset.scene ?? 'bridge');
+  next.hash = 'preview-controls';
+  openPreview.href = next.href;
+}
+
+function setControlsHidden(hidden: boolean): void {
+  panel.hidden = hidden;
+  show.hidden = !hidden;
+  if (hidden) query.set('controls', 'hidden');
+  else query.delete('controls');
+  syncLinks();
+}
+
+setControlsHidden(query.get('controls') === 'hidden');
+hide.addEventListener('click', () => {
+  setControlsHidden(true);
+  display.focus({ preventScroll: true });
+});
+function restoreControls(): void {
+  setControlsHidden(false);
+  hide.focus({ preventScroll: true });
+}
+show.addEventListener('click', restoreControls);
+document.addEventListener('keydown', event => {
+  if (panel.hidden && event.key === 'Escape') restoreControls();
+});
+
+ghost.checked = query.get('display') === 'ghost';
+view.setGhostDisplay(ghost.checked);
+ghost.addEventListener('change', () => {
+  if (ghost.checked) query.set('display', 'ghost');
+  else query.delete('display');
+  view.setGhostDisplay(ghost.checked);
+  syncLinks();
+});
 
 motion.checked = reducedMotion.matches;
 view.setPaused(motion.checked);
@@ -74,8 +130,10 @@ function displayPlace(selection: Location): void {
   setText(document.querySelector<HTMLElement>('#place')!, selection.name);
   setText(document.querySelector<HTMLElement>('#region')!, selection.region);
   document.querySelector<HTMLElement>('#region')!.hidden = !selection.region;
+  document.querySelector<HTMLElement>('#scene-attribution')!.hidden = selection.scene !== 'theatre';
   scene.dataset.scene = selection.scene;
   void view.select(scenes[selection.scene]);
+  syncLinks();
 }
 
 function displayWeather({ reading, state, paused }: WeatherStatus): void {
@@ -110,6 +168,7 @@ retry.addEventListener('blur', () => {
 });
 
 if (live) {
+  openPreview.hidden = false;
   const weather = new WeatherUpdates(fetchWeather, displayWeather);
   const highlight = locationControls(searchPlaces, selection => {
     saveLocation(selection);
@@ -137,18 +196,23 @@ if (live) {
   for (const { id, label } of fixtureOptions) fixture.add(new Option(label, id));
   fixture.value = fixtureOptions.some(({ id }) => id === selectedFixture) ? selectedFixture : defaultFixture;
   document.querySelector<HTMLElement>('#fixture-controls')!.hidden = false;
-  const requestedScene = query.get('scene');
-  const place = requestedScene === 'landscape' ? { ...presets[0], name: 'Generic landscape', region: '', scene: 'landscape' } as const :
-    requestedScene === 'theatre' ? presets[1] : presets[0];
-  displayPlace(place);
-  if (!forcedFixture) {
-    const highlight = locationControls(undefined, selection => {
-      displayPlace(selection);
-      highlight(selection);
-    });
-    highlight(place);
+  exitPreview.hidden = import.meta.env.VITE_WEATHER_MODE === 'fixture';
+  if (location.hash === '#preview-controls') settings.open = true;
+  function selectPreviewScene(id: string): void {
+    const place: Location = id === 'landscape'
+      ? { ...presets[0], name: 'Generic landscape', region: '', scene: 'landscape' }
+      : id === 'theatre' ? presets[1] : presets[0];
+    previewScene.value = place.scene;
+    query.set('scene', place.scene);
+    displayPlace(place);
   }
-  fixture.addEventListener('change', displayFixture);
+  selectPreviewScene(query.get('scene') ?? 'bridge');
+  previewScene.addEventListener('change', () => selectPreviewScene(previewScene.value));
+  fixture.addEventListener('change', () => {
+    query.set('fixture', fixture.value);
+    syncLinks();
+    displayFixture();
+  });
   updates.addEventListener('change', displayFixture);
   displayFixture();
 }

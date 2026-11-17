@@ -30,6 +30,12 @@ Chromium with SwiftShader rendered the thunderstorm fixture for each scene on a 
 
 For the physical phone check, open the storm fixture for the [bridge](https://weather-vid.vercel.app/projects/weather/?fixture=storm&scene=bridge&benchmark=1), [theater](https://weather-vid.vercel.app/projects/weather/?fixture=storm&scene=theatre&benchmark=1), and [landscape](https://weather-vid.vercel.app/projects/weather/?fixture=storm&scene=landscape&benchmark=1). Keep each tab in the foreground with **Pause animation** unchecked until the panel shows a median frame rate. Record the phone model, browser, and three readings in #9 or #11. Separately, open the [live app](https://weather-vid.vercel.app/projects/weather/) to exercise the forecast, location search, and scene switching.
 
+### Finer pixel grid
+
+At 1280 × 720, the theater rain fixture draws at 1049 × 590 with the new starting scale, compared with 870 × 489 at baseline. At 390 × 844, it draws at 319 × 692, compared with 265 × 573. The finer grid keeps more of the diagonal sign supports, raised trim, and lettering distinct in portrait. Add `&quality=baseline` to the same fixture for comparison.
+
+In Chromium SwiftShader with the emulated Pixel 7 viewport, the storm fixture measured 59.9 fps median at both settings for the bridge, theater, and landscape. The rebuilt theater GLB is 1,148,420 bytes. The renderer can still lower resolution during sustained slow frames. The frame-rate measurements cover software rendering on the test machine. Use the physical phone links above for device results.
+
 ## Monitoring and rollback
 
 The free weather tier publishes limits of 600 requests per minute, 5,000 per hour, 10,000 per day, and 300,000 per month. A continuously visible tab normally makes up to 96 weather refreshes per day, plus requests for location changes, searches, and retries. Monitor weather network errors, HTTP 429s, and repeated stale or unavailable states with browser smoke checks. Use Vercel logs to inspect routing failures and unexpected asset 404s. [Open-Meteo plans](https://open-meteo.com/en/pricing)

@@ -9,12 +9,12 @@
     <title>Weather Miniatures</title>
   </head>
   <body>
-    <main>
+    <main id="display" tabindex="-1">
       <div id="scene" class="scene" aria-hidden="true">
         <img id="poster" alt="" />
       </div>
 
-      <section class="weather-panel" aria-labelledby="place">
+      <section id="weather-panel" class="weather-panel" aria-labelledby="place">
         <header class="place">
           <h1 id="place">Golden Gate Bridge</h1>
           <p id="region">San Francisco, CA</p>
@@ -48,18 +48,32 @@
           <a href="https://open-meteo.com/">Open-Meteo</a> · <a href="https://www.geonames.org/">GeoNames</a>
           <br /><a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> · Conditions grouped for animation
         </p>
-        <details class="display-panel">
+        <details id="preview-controls" class="display-panel">
           <summary>Display settings</summary>
           <div class="display-controls">
             <label><input id="motion" type="checkbox" /> Pause animation</label>
             <label><input id="updates" type="checkbox" /> Pause weather updates</label>
+            <label><input id="ghost" type="checkbox" /> Pepper’s ghost display</label>
+            <button id="hide-controls" type="button">Hide controls</button>
+            <a id="open-preview" href="?fixture=fog#preview-controls" hidden>Preview weather animations</a>
             <div id="fixture-controls" hidden>
+              <label for="preview-scene">Preview scene</label>
+              <select id="preview-scene">
+                <option value="bridge">Golden Gate Bridge</option>
+                <option value="theatre">Grand Lake Theater</option>
+                <option value="landscape">Generic landscape</option>
+              </select>
               <label for="fixture">Weather fixture</label>
               <select id="fixture"></select>
+              <a id="exit-preview" href="./">Return to live weather</a>
             </div>
           </div>
         </details>
+        <p class="attribution" id="scene-attribution" hidden>
+          <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a> · USGS 3DEP
+        </p>
       </section>
+      <button id="show-controls" type="button" aria-controls="weather-panel" hidden><span>Show controls</span></button>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>
