@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#15262d" />
+    <meta name="description" content="Current weather in animated miniature scenes." />
+    <link rel="icon" href="data:," />
+    <title>Weather Miniatures</title>
+  </head>
+  <body>
+    <main>
+      <div id="scene" class="scene" aria-hidden="true">
+        <img id="poster" alt="" />
+      </div>
+
+      <section class="weather-panel" aria-labelledby="place">
+        <header class="place">
+          <h1 id="place">Golden Gate Bridge</h1>
+          <p id="region">San Francisco, CA</p>
+        </header>
+
+        <div class="reading">
+          <span id="condition">Loading weather…</span>
+          <span id="temperature"></span>
+        </div>
+        <p class="weather-status" id="weather-status" role="status"></p>
+
+        <details id="location-panel" hidden>
+          <summary>Change location</summary>
+          <div id="location-controls"></div>
+        </details>
+        <details class="display-panel">
+          <summary>Display settings</summary>
+          <div class="display-controls">
+            <label><input id="motion" type="checkbox" /> Pause animation</label>
+            <label><input id="updates" type="checkbox" /> Pause weather updates</label>
+            <div id="fixture-controls" hidden>
+              <label for="fixture">Weather fixture</label>
+              <select id="fixture"></select>
+            </div>
+          </div>
+        </details>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

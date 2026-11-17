@@ -6,11 +6,11 @@ Build a browser weather display with live 3D miniature scenes for the Golden Gat
 
 ## Project Structure
 
-The repository is in the planning phase. Read `CONTEXT.md` for project terminology and `docs/first-release-plan.md` for the implementation slices. Document the source, test, and asset directories as they are introduced.
+Read `CONTEXT.md` for terminology and `docs/first-release-plan.md` for the implementation slices. The browser app lives in `src/`, automated checks in `tests/`, generated scene assets in `public/scenes/`, and scene build scripts in `tools/`.
 
 ## Development and Verification
 
-When introducing the build system and test runner, document installation, local serving, testing, and build commands here. Verify that the page loads through a local server, live weather requests succeed in preview, and the scene and still fallback work in supported browsers. Check the browser console for errors.
+Use Node.js 22.12 or newer. Run `npm ci` to install, `npm run dev` to serve locally, `npm run typecheck` to check types, `npm test` to run unit tests, and `npm run build` to make a production build. Run `npm run test:browser` with Playwright Chromium installed to check the scene, its fallback, and keyboard controls. See `README.md` for fixture and asset instructions. Verify each supported browser and check the browser console for errors.
 
 ## Coding Style and Architecture
 
