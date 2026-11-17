@@ -2,23 +2,23 @@
 
 ## Project Purpose
 
-Build a small weather display that selects and loops a pre-rendered animation for current conditions. The initial concept uses San Francisco weather and a Pepper's ghost display. Plan to host it as a project on sfxmath.com using Vercel. Keep the scene, camera position, and framing consistent across clips; use bright subjects against black and test the reflection on the actual hardware.
+Build a browser weather display with live 3D miniature scenes for the Golden Gate Bridge, Grand Lake Theater, and a generic landscape for searched locations. The first release targets Vercel hosting on sfxmath.com. Pepper's ghost display support is a later phase. See [the first release plan](docs/first-release-plan.md) for the product and technical decisions.
 
 ## Project Structure
 
-The repository is currently empty; no source, tests, or assets have been established. If following the supplied prototype, place the web page at the project root and MP4 loops in `videos/` beside it. Use descriptive, lowercase, hyphenated names such as `clear-day.mp4`, `clear-night.mp4`, and `partly-cloudy.mp4`. Document any different structure as it is introduced.
+The repository is in the planning phase. Read `CONTEXT.md` for project terminology and `docs/first-release-plan.md` for the implementation slices. Document the source, test, and asset directories as they are introduced.
 
 ## Development and Verification
 
-No build system, package manager, test runner, or project commands are configured yet. When adding them, document installation, local serving, testing, and build commands here. For a browser prototype, verify that the page loads through a local server, the weather request succeeds, and video playback works on the intended display. Check the browser console for errors.
+When introducing the build system and test runner, document installation, local serving, testing, and build commands here. Verify that the page loads through a local server, live weather requests succeed in preview, and the scene and still fallback work in supported browsers. Check the browser console for errors.
 
 ## Coding Style and Architecture
 
-Use readable, consistently formatted HTML and JavaScript. Keep weather fetching, condition-to-clip mapping, and playback responsibilities easy to distinguish. Map day and night separately where needed, provide a fallback for unknown codes, and avoid restarting a clip when the selected condition has not changed. On request failure, retain the last successful animation. Add formatter or linter instructions here if tools are adopted.
+Use readable, consistently formatted HTML and TypeScript. Keep location selection, weather fetching, scene weather mapping, and rendering easy to distinguish. Provide a neutral fallback for unknown codes and preserve animation continuity when the visual state stays the same. Apply the same-location stale-weather policy in the release plan. Add formatter or linter instructions here if tools are adopted.
 
 ## Testing Guidelines
 
-No testing framework or coverage target is currently defined. As functionality is added, test representative clear, cloudy, rain, snow, fog, and thunderstorm codes, including day/night and unknown-code cases. Verify failed requests and unchanged conditions, then check looping, orientation, brightness, and framing on the physical display. Document automated test commands and naming conventions once established.
+As functionality is added, test clear, cloudy, fog, rain, snow, and thunderstorm codes, including day, night, and unknown codes. Verify request failures, stale and expired weather, location switching, and unchanged scene weather. Check framing, keyboard access, reduced-motion behavior, and the static fallback. Document test commands and naming conventions once established.
 
 ## Commits and Pull Requests
 
@@ -26,7 +26,7 @@ There is no Git history from which to infer a commit convention. Use short, desc
 
 ## Deployment
 
-Target Vercel for hosting on sfxmath.com. The project's final URL and integration with the existing site are undecided; avoid assuming a root domain or URL path. Use asset paths that work at the chosen deployment location, and verify weather requests and video playback in a Vercel preview before release. Document deployment settings once established.
+Target Vercel for hosting on sfxmath.com. The project's final URL and integration with the existing site are undecided; avoid assuming a root domain or URL path. Use asset paths that work at the chosen deployment location, and verify forecast, geocoding, and scene loading in a Vercel preview before release. Document deployment settings once established.
 
 ## Configuration
 
