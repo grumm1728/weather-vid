@@ -29,6 +29,8 @@ test('searches, disambiguates and restores a generic location while preserving t
   await expect(page.locator('#temperature')).toHaveText('58°F');
   await expect(page.locator('#scene')).toHaveAttribute('data-scene', 'bridge');
   await page.getByText('Change location', { exact: true }).click();
+  await expect(page.locator('#search-status')).toHaveRole('status');
+  await expect(page.locator('#search-status')).toBeVisible();
   const query = page.getByLabel('City or postal code');
   await query.fill('Nowhere');
   await query.press('Enter');

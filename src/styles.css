@@ -149,7 +149,13 @@ summary { font-size: .86rem; }
 }
 
 .search-results small { display: block; color: #c4d0d2; }
-.search-results:empty, #search-status:empty { display: none; }
+.search-results:empty { display: none; }
+#search-status:empty {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+}
 .attribution { font-size: .69rem; line-height: 1.45; color: #c4d0d2; }
 .attribution a { color: #b8dce2; }
 
