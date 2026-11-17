@@ -32,3 +32,18 @@ Target Vercel for hosting on sfxmath.com. The project's final URL and integratio
 
 Keep credentials out of source control if a future weather provider requires them. Document configuration variables and defaults without committing secrets. Review the weather provider's terms before commercial distribution.
 
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in GitHub Issues for `grumm1728/weather-vid`.
+See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use the default five-label vocabulary. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This is a single-context repository. See `docs/agents/domain.md`.
