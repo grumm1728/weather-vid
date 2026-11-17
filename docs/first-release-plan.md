@@ -1,6 +1,6 @@
 # Weather Miniatures first browser release plan
 
-This plan covers the Golden Gate Bridge, Grand Lake Theater, and a generic landscape for searched locations. It records decisions from [location and scene selection (#4)](https://github.com/grumm1728/weather-vid/issues/4), [scene weather (#5)](https://github.com/grumm1728/weather-vid/issues/5), and [weather and location data (#6)](https://github.com/grumm1728/weather-vid/issues/6). It is the working plan for [staged implementation (#7)](https://github.com/grumm1728/weather-vid/issues/7).
+This plan covers the Golden Gate Bridge, Grand Lake Theater, and a generic landscape for searched locations. It records decisions from [visual direction (#3)](https://github.com/grumm1728/weather-vid/issues/3), [location and scene selection (#4)](https://github.com/grumm1728/weather-vid/issues/4), [scene weather (#5)](https://github.com/grumm1728/weather-vid/issues/5), and [weather and location data (#6)](https://github.com/grumm1728/weather-vid/issues/6). It is the working plan for [staged implementation (#7)](https://github.com/grumm1728/weather-vid/issues/7).
 
 The animation is the primary view. A discreet control panel provides location selection, current weather, status, and display controls. The three scenes ship in the first public release. Pepper’s ghost display support is a later phase.
 
@@ -22,7 +22,7 @@ The animation is the primary view. A discreet control panel provides location se
 | Thunderstorm | 95, 96, 97, 99 | Dark storm clouds and precipitation with no flashes |
 | Unknown | Any other code or missing value | Neutral weather effects |
 
-Preserve the detailed provider description for distinctions grouped into one scene effect, including freezing precipitation and hail. Approve each scene’s treatment under [visual direction (#3)](https://github.com/grumm1728/weather-vid/issues/3). [Provider code reference](https://open-meteo.com/en/docs#wmo_weather_interpretation_codes)
+Preserve the detailed provider description for distinctions grouped into one scene effect, including freezing precipitation and hail. Use the visual review criteria in slice 3 for each production scene. [Provider code reference](https://open-meteo.com/en/docs#wmo_weather_interpretation_codes)
 
 ## Technical decisions
 
@@ -54,9 +54,11 @@ Deliver the two landmark presets, search, persistence, weather normalization, an
 
 ### 3. Production scenes and posters
 
-Deliver the three production miniatures using the approved direction in #3. Treat the bridge, theater, and generic landscape as separately reviewable assets.
+Deliver the three production miniatures in the [approved aerial pixel-art style](https://github.com/grumm1728/weather-vid/issues/3#issuecomment-6959958905). The [Golden Gate Bridge mockup](../design-explorations/weather-miniatures/01-initial-exploration/06-isometric-pixel-art-bridge.png) is the primary composition reference. The [Grand Lake Theatre mockup](../design-explorations/weather-miniatures/01-initial-exploration/07-isometric-pixel-art-theatre.png) shows the lower aerial angle and signage treatment. Treat the bridge, theater, and generic landscape as separately reviewable assets.
 
-- Record the camera, framing, scale conventions, materials, lighting/effect treatment, and supported aspect ratios from #3. Keep editable Blender sources, exported GLBs, and matching posters reproducible through documented export settings. Use original or properly licensed assets and record the credits.
+- Give each scene a full-bleed aerial composition with crisp pixel edges, legible silhouettes, and restrained colors. Let the animation fill the view. Keep the weather and location panel compact, use legible interface text, and place it over a quiet part of the scene. Use the widescreen mockups for desktop and reframe for portrait so the landmark and controls remain visible and usable.
+- Keep both Golden Gate Bridge towers, the continuous span, and the shoreline readable in fog. Use a lower aerial angle at Grand Lake Theater to show the three-line **GRAND LAKE THEATRE** rooftop sign, its open metal frame and bulbs, and the curved **GRAND LAKE** marquee. Carry the same aerial view and pixel treatment into the generic landscape with a distinct focal landform or feature.
+- Record each production scene’s camera, framing, scale, pixel treatment, lighting, effect bounds, and supported aspect ratios. Keep editable Blender sources, exported GLBs, and matching posters reproducible through documented export settings. Use original or properly licensed assets and record the credits.
 - Review each scene with clear day, clear night, fog, rain, snow, and thunderstorm fixtures. The scene remains recognizable through weather changes. The generic landscape uses the same asset for every searched location. Under reduced motion, the selected scene remains recognizable and weather is conveyed in text.
 - Load only the selected model for first view. Repeated switching releases obsolete resources and keeps the interface responsive. Review the approved composition at a representative phone size and desktop size. Record model transfer sizes and median frame rate on those devices, with 30 fps as the initial baseline for the busiest effect on the agreed mobile reference device.
 
@@ -67,7 +69,3 @@ Deploy the integrated release to Vercel preview. Confirm the final sfxmath.com r
 - Run the automated suite and smoke-test all three experiences in Chromium, Firefox, and Safari, including an actual mobile device. Verify WebGL rendering, model switching, resizing, static fallback, and both live provider requests from the deployed page. Use mocked Playwright tests for failure paths and visible status changes. [Playwright network mocking](https://playwright.dev/docs/mock)
 - Target WCAG 2.2 AA. Manually verify logical keyboard order and focus, a visible focus indicator, text contrast, screen-reader announcements for actionable state changes, operation without relying on color, and pause controls. Check motion with the system preference enabled and confirm ongoing animation and weather updates can be paused. [WCAG 2.2](https://www.w3.org/TR/WCAG22/) · [Reduced motion media feature](https://www.w3.org/TR/mediaqueries-5/#prefers-reduced-motion)
 - Record eligibility for the chosen Open-Meteo and Vercel tiers, final URL, environment variable names, and provider quota and failure signals to check after launch. Verify the final origin separately from preview. Use the last verified deployment as the rollback target and document the process. [Open-Meteo pricing](https://open-meteo.com/en/pricing) · [Vercel plan eligibility](https://vercel.com/docs/limits/fair-use-guidelines#commercial-usage)
-
-## Remaining design handoff
-
-Issue #7 can be finalized once #3 supplies the approved reference and review criteria for production composition, art, weather treatment, and responsive framing. Record that reference in slice 3 and use it to review the panel in slices 1 and 4. The deploy route, hosting tier eligibility, and measurement device are release and production checks in the slices above.
