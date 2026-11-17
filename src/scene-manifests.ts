@@ -42,10 +42,10 @@ export const scenes: Record<SceneId, SceneManifest> = {
     model: 'scenes/theatre.glb',
     poster: 'scenes/theatre.webp',
     portraitPoster: 'scenes/theatre-portrait.webp',
-    camera: { position: [35, 58, 151], target: [0, 6.4, 1.5], width: 46, portraitWidth: 30 },
-    effects: { width: 62, depth: 80, height: 37, fogHeight: 8.7 },
+    camera: { position: [24, 43, 164], target: [0, 8.7, 2], width: 52, portraitWidth: 35 },
+    effects: { width: 74, depth: 104, height: 39, fogHeight: 9.1 },
     water: false,
-    nightLight: { position: [0, 3.1, 9.75], color: '#ffb158', intensity: 94 },
+    nightLight: { position: [-1.2, 4.5, 17.8], color: '#ffb158', intensity: 141 },
   },
   landscape: {
     id: 'landscape',

@@ -1,5 +1,56 @@
 import { expect, test } from '@playwright/test';
 
+test('opens scene previews from live settings, shares selections and restores hidden controls', async ({ page }) => {
+  await page.route('https://api.open-meteo.com/**', route => route.abort());
+  await page.goto('./');
+  await page.getByText('Display settings', { exact: true }).click();
+  await page.getByRole('link', { name: 'Preview weather animations' }).click();
+  await page.getByLabel('Preview scene').selectOption('landscape');
+  await page.getByLabel('Weather fixture').selectOption('snow');
+  await expect(page).toHaveURL(/fixture=snow&scene=landscape/);
+  await expect(page.locator('#condition')).toHaveText('Snow');
+  await expect(page.locator('#weather-status')).toHaveText('Weather preview');
+  await page.getByRole('button', { name: 'Hide controls' }).click();
+  await expect(page.locator('#weather-panel')).toBeHidden();
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: 'Show controls' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('button', { name: 'Hide controls' })).toBeFocused();
+  await page.getByRole('button', { name: 'Hide controls' }).click();
+  await page.dispatchEvent('#show-controls', 'click', { pointerType: 'touch' });
+  await expect(page.getByRole('link', { name: 'Return to live weather' })).toBeVisible();
+  await page.getByRole('link', { name: 'Return to live weather' }).click();
+  expect(new URL(page.url()).searchParams.has('fixture')).toBe(false);
+});
+
+test('contains the live canvas and fallback poster within the black surround', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.goto('./?fixture=storm&scene=theatre&display=ghost&controls=hidden');
+  await expect(page.locator('#display')).toHaveCSS('background-color', 'rgb(0, 0, 0)');
+  await expect(page.locator('#scene')).toHaveAttribute('data-renderer', 'webgl');
+  expect(await page.locator('#scene canvas').boundingBox()).toEqual({ x: 39, y: 80, width: 312, height: 640 });
+  await page.route('**/scenes/theatre.glb', route => route.abort());
+  await page.reload();
+  await expect(page.locator('#poster')).toBeVisible();
+  await expect(page.locator('#poster')).toHaveCSS('object-fit', 'contain');
+  expect(await page.locator('#poster').boundingBox()).toEqual({ x: 39, y: 80, width: 312, height: 640 });
+});
+
+test('uses the detailed render by default and retains the fixture comparison setting', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('./?fixture=rain-night&scene=theatre');
+  await expect(page.locator('#scene')).toHaveAttribute('data-renderer', 'webgl');
+  const canvas = page.locator('#scene canvas');
+  await expect(canvas).toHaveAttribute('width', '319');
+  await expect(canvas).toHaveAttribute('height', '692');
+  await page.goto('./?fixture=rain-night&scene=theatre&quality=baseline');
+  await expect(page.locator('#scene')).toHaveAttribute('data-renderer', 'webgl');
+  await expect(canvas).toHaveAttribute('width', '265');
+  await expect(canvas).toHaveAttribute('height', '573');
+});
+
 test('reports the storm frame-rate benchmark only for opted-in fixtures', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./?fixture=storm&scene=theatre');
