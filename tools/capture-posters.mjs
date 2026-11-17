@@ -15,7 +15,7 @@ const browser = await chromium.launch({
 try {
   await mkdir(destination, { recursive: true });
   if (visualDirectory) await mkdir(visualDirectory, { recursive: true });
-  for (const [width, height, suffix] of [[1280, 720, ''], [450, 800, '-portrait']]) {
+  for (const [width, height, suffix] of [[1672, 941, ''], [390, 844, '-portrait']]) {
     const page = await browser.newPage({ viewport: { width, height }, reducedMotion: 'reduce' });
     const url = new URL(base);
     url.searchParams.set('fixture', fixture);

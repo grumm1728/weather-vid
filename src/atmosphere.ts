@@ -104,7 +104,7 @@ export class Atmosphere {
             (position.z - .5) * depth
           );
           gl_Position = projectionMatrix * modelViewMatrix * vec4(p,1.);
-          gl_PointSize = mix(11.,3.2,snow) * clamp(scale, .6, 1.35);
+          gl_PointSize = mix(8.,3.2,snow) * clamp(scale, .6, 1.35);
         }
       `,
       fragmentShader: `
@@ -144,7 +144,7 @@ export class Atmosphere {
 
     this.precipitation.visible = kind === 'rain' || kind === 'snow' || kind === 'storm';
     drops.snow.value = Number(kind === 'snow');
-    drops.strength.value = kind === 'storm' ? .8 : kind === 'rain' ? .65 : .85;
+    drops.strength.value = kind === 'storm' ? .77 : kind === 'rain' ? .54 : .85;
     drops.width.value = manifest.effects.width;
     drops.depth.value = manifest.effects.depth;
     drops.height.value = manifest.effects.height;

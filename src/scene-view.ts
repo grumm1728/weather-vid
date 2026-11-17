@@ -1,5 +1,5 @@
 import {
-  Color, DirectionalLight, HemisphereLight, Material, Mesh, OrthographicCamera, Scene, Texture,
+  Color, DirectionalLight, HemisphereLight, Material, Mesh, OrthographicCamera, PointLight, Scene, Texture,
   Vector2, WebGLRenderer,
 } from 'three';
 import type { Object3D } from 'three';
@@ -33,6 +33,7 @@ export class SceneView {
   private readonly scene = new Scene();
   private readonly ambient = new HemisphereLight();
   private readonly sun = new DirectionalLight();
+  private readonly accent = new PointLight(0xffffff, 0, 22);
   private readonly loader = new GLTFLoader();
   private readonly dimensions = new Vector2();
   private renderer?: WebGLRenderer;
@@ -42,6 +43,8 @@ export class SceneView {
   private weather: SceneWeather = { kind: 'neutral', daylight: 'neutral' };
   private frame = 0;
   private lastFrame?: number;
+  private slowFrames = 0;
+  private resolutionScale = .68;
   private time = 0;
   private generation = 0;
   private paused = false;
@@ -61,7 +64,7 @@ export class SceneView {
 
     this.atmosphere = new Atmosphere();
     this.sun.position.set(-15, 38, 18);
-    this.scene.add(this.ambient, this.sun, this.atmosphere.water, this.atmosphere.cloud, this.atmosphere.precipitation);
+    this.scene.add(this.ambient, this.sun, this.accent, this.atmosphere.water, this.atmosphere.cloud, this.atmosphere.precipitation);
     canvas.hidden = true;
     this.container.append(canvas);
     canvas.addEventListener('webglcontextlost', event => {
@@ -89,6 +92,8 @@ export class SceneView {
     const generation = ++this.generation;
     this.manifest = manifest;
     this.cancelFrame();
+    this.resolutionScale = .68;
+    this.slowFrames = 0;
     this.updatePoster();
     this.showStill();
     if (!this.renderer) return;
@@ -152,7 +157,7 @@ export class SceneView {
     this.camera.position.set(...camera.position);
     this.camera.lookAt(...camera.target);
     this.camera.updateProjectionMatrix();
-    const scale = Math.min(.68, 1100 / width, 700 / height);
+    const scale = Math.min(this.resolutionScale, 1100 / width, 700 / height);
     this.renderer.setSize(Math.max(1, Math.floor(width * scale)), Math.max(1, Math.floor(height * scale)), false);
   }
 
@@ -168,6 +173,13 @@ export class SceneView {
     this.ambient.intensity = night ? .73 : daylight === 'neutral' ? 1.7 : 1.8;
     this.sun.color.set(night ? '#a0baff' : '#ffedcd');
     this.sun.intensity = night ? .32 : daylight === 'neutral' || gray ? .65 : light ? 2.1 : 1.15;
+    const accent = this.manifest.nightLight;
+    this.accent.visible = Boolean(night && accent);
+    if (accent) {
+      this.accent.position.set(...accent.position);
+      this.accent.color.set(accent.color);
+      this.accent.intensity = accent.intensity;
+    }
     this.atmosphere.apply(this.weather, this.manifest);
   }
 
@@ -192,7 +204,18 @@ export class SceneView {
   private readonly draw = (now: number): void => {
     this.frame = 0;
     if (!this.renderer || !this.atmosphere || this.lost) return;
-    if (!this.paused && this.lastFrame !== undefined) this.time += Math.min((now - this.lastFrame) / 1000, .05);
+    if (!this.paused && this.lastFrame !== undefined) {
+      const elapsed = now - this.lastFrame;
+      this.time += Math.min(elapsed / 1000, .05);
+      if (this.resolutionScale > .38) {
+        this.slowFrames = elapsed > 35 ? this.slowFrames + 1 : Math.max(0, this.slowFrames - 1);
+        if (this.slowFrames >= 6) {
+          this.resolutionScale = Math.max(.38, this.resolutionScale - .10);
+          this.slowFrames = 0;
+          this.resize();
+        }
+      }
+    }
     this.lastFrame = now;
     this.renderer.getDrawingBufferSize(this.dimensions);
     this.atmosphere.update(this.time, this.dimensions.x / 720);

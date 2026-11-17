@@ -1,0 +1,9 @@
+.env
+.env.*
+.scene-tools/
+design-explorations/
+dist/
+node_modules/
+playwright-report/
+scene-source/
+test-results/

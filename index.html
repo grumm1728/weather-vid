@@ -20,16 +20,34 @@
           <p id="region">San Francisco, CA</p>
         </header>
 
-        <div class="reading">
+        <div class="reading" aria-live="polite" aria-atomic="true">
           <span id="condition">Loading weather…</span>
           <span id="temperature"></span>
         </div>
         <p class="weather-status" id="weather-status" role="status"></p>
+        <button id="retry-weather" type="button" hidden>Retry weather</button>
 
         <details id="location-panel" hidden>
           <summary>Change location</summary>
-          <div id="location-controls"></div>
+          <div class="location-controls">
+            <fieldset id="landmarks">
+              <legend>Landmarks</legend>
+            </fieldset>
+            <form id="place-search" role="search" aria-label="Search for a place">
+              <label for="search-query">City or postal code</label>
+              <div class="search-row">
+                <input id="search-query" type="search" maxlength="120" autocomplete="off" required />
+                <button type="submit">Search</button>
+              </div>
+              <p id="search-status" role="status"></p>
+              <ul id="search-results" class="search-results"></ul>
+            </form>
+          </div>
         </details>
+        <p class="attribution" id="attribution" hidden>
+          <a href="https://open-meteo.com/">Open-Meteo</a> · <a href="https://www.geonames.org/">GeoNames</a>
+          <br /><a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> · Conditions grouped for animation
+        </p>
         <details class="display-panel">
           <summary>Display settings</summary>
           <div class="display-controls">
