@@ -1,5 +1,17 @@
 import { expect, test } from '@playwright/test';
 
+test('reports the storm frame-rate benchmark only for opted-in fixtures', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./?fixture=storm&scene=theatre');
+  await expect(page.locator('#frame-benchmark')).toHaveCount(0);
+  await page.goto('./?fixture=storm&scene=theatre&benchmark=1');
+  await expect(page.locator('#scene')).toHaveAttribute('data-renderer', 'webgl');
+  await expect(page.locator('#frame-benchmark')).toHaveText(/Measuring frame rate/);
+  await page.getByText('Display settings', { exact: true }).click();
+  await page.getByLabel('Pause animation').uncheck();
+  await expect(page.locator('#frame-benchmark')).toHaveText(/Median frame rate: \d+\.\d fps/, { timeout: 15_000 });
+});
+
 test('renders the model through a nested base and supports keyboard fixture and pause controls', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));

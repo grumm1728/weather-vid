@@ -50,7 +50,11 @@ export class SceneView {
   private paused = false;
   private lost = false;
 
-  constructor(private readonly container: HTMLElement, private readonly poster: HTMLImageElement) {
+  constructor(
+    private readonly container: HTMLElement,
+    private readonly poster: HTMLImageElement,
+    private readonly onFrame?: (elapsed: number | undefined) => void,
+  ) {
     this.container.dataset.renderer = 'still';
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('webgl2', { alpha: false, antialias: false });
@@ -204,8 +208,8 @@ export class SceneView {
   private readonly draw = (now: number): void => {
     this.frame = 0;
     if (!this.renderer || !this.atmosphere || this.lost) return;
-    if (!this.paused && this.lastFrame !== undefined) {
-      const elapsed = now - this.lastFrame;
+    const elapsed = !this.paused && this.lastFrame !== undefined ? now - this.lastFrame : undefined;
+    if (elapsed !== undefined) {
       this.time += Math.min(elapsed / 1000, .05);
       if (this.resolutionScale > .38) {
         this.slowFrames = elapsed > 35 ? this.slowFrames + 1 : Math.max(0, this.slowFrames - 1);
@@ -228,6 +232,7 @@ export class SceneView {
     this.renderer.domElement.hidden = false;
     this.poster.hidden = true;
     this.container.dataset.renderer = 'webgl';
+    this.onFrame?.(elapsed);
     if (!this.paused) this.requestFrame();
   };
 }

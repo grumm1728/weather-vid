@@ -24,7 +24,8 @@ const query = new URLSearchParams(location.search);
 const selectedFixture = query.get('fixture') ?? defaultFixture;
 const forcedFixture = query.has('fixture');
 const live = !forcedFixture && import.meta.env.VITE_WEATHER_MODE !== 'fixture';
-const view = new SceneView(scene, poster);
+const sampleFrames = forcedFixture && query.get('benchmark') === '1' ? frameBenchmark() : undefined;
+const view = new SceneView(scene, poster, sampleFrames);
 
 motion.checked = reducedMotion.matches;
 view.setPaused(motion.checked);
@@ -36,6 +37,37 @@ reducedMotion.addEventListener('change', ({ matches }) => {
 
 function setText(element: HTMLElement, text: string): void {
   if (element.textContent !== text) element.textContent = text;
+}
+
+function frameBenchmark(): (elapsed: number | undefined) => void {
+  const output = document.createElement('p');
+  output.id = 'frame-benchmark';
+  output.className = 'weather-status';
+  output.setAttribute('role', 'status');
+  status.after(output);
+  output.textContent = 'Measuring frame rate. Keep this tab visible with animation running.';
+  const intervals: number[] = [];
+  let warmup = 10;
+  let finished = false;
+  return elapsed => {
+    if (finished) return;
+    if (elapsed === undefined) {
+      warmup = 10;
+      intervals.length = 0;
+      return;
+    }
+    if (warmup > 0) {
+      warmup -= 1;
+      return;
+    }
+    intervals.push(elapsed);
+    if (intervals.length === 75) {
+      intervals.sort((left, right) => left - right);
+      const median = intervals[37];
+      output.textContent = `Median frame rate: ${(1000 / median).toFixed(1)} fps`;
+      finished = true;
+    }
+  };
 }
 
 function displayPlace(selection: Location): void {
