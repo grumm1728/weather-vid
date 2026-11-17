@@ -2,13 +2,16 @@
 
 import argparse
 from collections import defaultdict
-from math import cos, sin, pi
+from math import cos, sin, pi, hypot
 from pathlib import Path
 from random import Random
 import sys
 
 import bpy
 from mathutils import Vector
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from production_scenes import PALETTE as PRODUCTION_PALETTE, landscape, theatre
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -22,6 +25,7 @@ PALETTE = {
     "sand": "b4a98a", "wash": "62959b", "foam": "9cc5bf",
     "bulb": "ffeb9a", "roof": "9b553f", "truck": "e5dcc0",
 }
+PALETTE.update(PRODUCTION_PALETTE)
 
 
 def channels(hex_color):
@@ -92,9 +96,10 @@ class SceneBuilder:
             material.diffuse_color = rgb
             shader.inputs["Base Color"].default_value = rgb
             shader.inputs["Roughness"].default_value = .87
-            if name_of_material == "bulb":
+            emission = {"bulb": 1.1, "warm-window": .38, "marquee": .52, "puddle": .12}
+            if name_of_material in emission:
                 shader.inputs["Emission Color"].default_value = rgb
-                shader.inputs["Emission Strength"].default_value = 1.1
+                shader.inputs["Emission Strength"].default_value = emission[name_of_material]
             mesh = bpy.data.meshes.new(name_of_material)
             mesh.from_pydata(vertices, [], faces)
             mesh.materials.append(material)
@@ -104,7 +109,7 @@ class SceneBuilder:
 
         if blend_path:
             blend_path.parent.mkdir(parents=True, exist_ok=True)
-            bpy.ops.wm.save_as_mainfile(filepath=str(blend_path))
+            bpy.ops.wm.save_as_mainfile(filepath=str(blend_path), compress=True)
         output = ROOT / "public" / "scenes" / f"{name}.glb"
         output.parent.mkdir(parents=True, exist_ok=True)
         bpy.ops.export_scene.gltf(filepath=str(output), export_format="GLB", export_lights=False,
@@ -167,6 +172,25 @@ def shoreline(b, side):
         x, y, _ = point(z, inset)
         b.house(x, y-.07, z, rng.uniform(.5,1.1), rng.uniform(.44,.9), rng.choice(["cream", "sand"]))
 
+    def road_vertex(index):
+        t = index / 43
+        z = side * (-3 + 33*t)
+        inset = 6.3 + 5*t + 2.8*sin(2.8*pi*t)
+        x, y, _ = point(z, inset)
+        return x, y+.14, z
+
+    for index in range(43):
+        x1,y1,z1 = road_vertex(index)
+        x2,y2,z2 = road_vertex(index+1)
+        dx,dz = x2-x1,z2-z1
+        length = hypot(dx,dz)
+        for width, lift, material in [(.90,0,"sand"),(.69,.035,"asphalt"),(.075,.058,"yellow")]:
+            if material == "yellow" and index % 2 == 0:
+                continue
+            nx,nz = dz/length*width/2, -dx/length*width/2
+            b.mesh(material, [(x1+nx,y1+lift,z1+nz),(x2+nx,y2+lift,z2+nz),
+                              (x2-nx,y2+lift,z2-nz),(x1-nx,y1+lift,z1-nz)], [(3,2,1,0)])
+
 
 def golden_gate(b):
     for side in (-1, 1):
@@ -225,12 +249,15 @@ def golden_gate(b):
 
 
 if __name__ == "__main__":
+    builders = {"bridge": (560, golden_gate), "theatre": (1834, theatre), "landscape": (207, landscape)}
     args_after_separator = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("scene", choices=["bridge"])
+    parser.add_argument("scene", choices=[*builders, "all"])
     parser.add_argument("--blend", action="store_true")
     options = parser.parse_args(args_after_separator)
-    builder = SceneBuilder(560)
-    golden_gate(builder)
-    blend = ROOT / "scene-source" / f"{options.scene}.blend" if options.blend else None
-    builder.build(options.scene, blend)
+    for name in builders if options.scene == "all" else [options.scene]:
+        seed, populate = builders[name]
+        builder = SceneBuilder(seed)
+        populate(builder)
+        blend = ROOT / "scene-source" / f"{name}.blend" if options.blend else None
+        builder.build(name, blend)
