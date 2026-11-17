@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('opens scene previews from live settings, shares selections and restores hidden controls', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 800 });
   await page.route('https://api.open-meteo.com/**', route => route.abort());
   await page.goto('./');
   await page.getByText('Display settings', { exact: true }).click();
@@ -12,10 +13,13 @@ test('opens scene previews from live settings, shares selections and restores hi
   await expect(page.locator('#weather-status')).toHaveText('Weather preview');
   await page.getByRole('button', { name: 'Hide controls' }).click();
   await expect(page.locator('#weather-panel')).toBeHidden();
+  await expect(page.locator('#display')).toHaveCSS('background-color', 'rgb(0, 0, 0)', { timeout: 1500 });
+  expect(await page.locator('#scene').boundingBox()).toEqual({ x: 39, y: 80, width: 312, height: 640 });
   await page.keyboard.press('Tab');
   await expect(page.getByRole('button', { name: 'Show controls' })).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('button', { name: 'Hide controls' })).toBeFocused();
+  expect(await page.locator('#scene').boundingBox()).toEqual({ x: 0, y: 0, width: 390, height: 800 });
   await page.getByRole('button', { name: 'Hide controls' }).click();
   await page.dispatchEvent('#show-controls', 'click', { pointerType: 'touch' });
   await expect(page.getByRole('link', { name: 'Return to live weather' })).toBeVisible();
@@ -26,8 +30,9 @@ test('opens scene previews from live settings, shares selections and restores hi
 test('contains the live canvas and fallback poster within the black surround', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 390, height: 800 });
-  await page.goto('./?fixture=storm&scene=theatre&display=ghost&controls=hidden');
+  await page.goto('./?fixture=storm&scene=theatre&controls=hidden');
   await expect(page.locator('#display')).toHaveCSS('background-color', 'rgb(0, 0, 0)');
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#000000');
   await expect(page.locator('#scene')).toHaveAttribute('data-renderer', 'webgl');
   expect(await page.locator('#scene canvas').boundingBox()).toEqual({ x: 39, y: 80, width: 312, height: 640 });
   await page.route('**/scenes/theatre.glb', route => route.abort());
@@ -35,6 +40,10 @@ test('contains the live canvas and fallback poster within the black surround', a
   await expect(page.locator('#poster')).toBeVisible();
   await expect(page.locator('#poster')).toHaveCSS('object-fit', 'contain');
   expect(await page.locator('#poster').boundingBox()).toEqual({ x: 39, y: 80, width: 312, height: 640 });
+  await page.goto('./?fixture=storm&scene=theatre&display=ghost&controls=hidden');
+  await page.keyboard.press('Escape');
+  await expect(page.getByLabel('Pepper’s ghost display')).toBeChecked();
+  await expect(page.locator('#display')).toHaveCSS('background-color', 'rgb(0, 0, 0)');
 });
 
 test('uses the detailed render by default and retains the fixture comparison setting', async ({ page }) => {

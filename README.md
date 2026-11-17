@@ -17,7 +17,7 @@ Use `?fixture=clear-night`, `?fixture=storm&scene=theatre`, or `?fixture=snow&sc
 
 In **Display settings**, choose **Preview weather animations** to select any scene and fixture. Copy the URL to share the selection or choose **Return to live weather**. Choose **Hide controls** for a scene-only view. Tap or click the scene, press Escape, or Tab to **Show controls** and press Enter to bring the panel back.
 
-**Pepper’s ghost display** adds 10% black padding on each side and widens the camera framing by 8%. Use **Hide controls** for a clean projection. A link with `?display=ghost&controls=hidden` opens directly in that view. These are starting settings for testing on the physical reflector.
+**Hide controls** turns on framing automatically, with 10% black padding on each side and an 8% wider camera view. Open a link with `?controls=hidden` for a clean projection. Turn on **Pepper’s ghost display** to keep the black frame when the controls are visible. These are starting settings for testing on the physical reflector.
 
 Add `&quality=baseline` to a fixture URL for a render-resolution comparison. The default starts with a finer pixel grid and scales down during sustained slow frames.
 

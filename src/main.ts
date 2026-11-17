@@ -32,6 +32,7 @@ const panel = document.querySelector<HTMLElement>('#weather-panel')!;
 const hide = document.querySelector<HTMLButtonElement>('#hide-controls')!;
 const show = document.querySelector<HTMLButtonElement>('#show-controls')!;
 const ghost = document.querySelector<HTMLInputElement>('#ghost')!;
+const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')!;
 const openPreview = document.querySelector<HTMLAnchorElement>('#open-preview')!;
 const exitPreview = document.querySelector<HTMLAnchorElement>('#exit-preview')!;
 const previewScene = document.querySelector<HTMLSelectElement>('#preview-scene')!;
@@ -57,9 +58,17 @@ function setControlsHidden(hidden: boolean): void {
   show.hidden = !hidden;
   if (hidden) query.set('controls', 'hidden');
   else query.delete('controls');
+  applyDisplayMode();
   syncLinks();
 }
 
+function applyDisplayMode(): void {
+  const framed = ghost.checked || panel.hidden;
+  view.setGhostDisplay(framed);
+  themeColor.content = framed ? '#000000' : '#15262d';
+}
+
+ghost.checked = query.get('display') === 'ghost';
 setControlsHidden(query.get('controls') === 'hidden');
 hide.addEventListener('click', () => {
   setControlsHidden(true);
@@ -74,12 +83,10 @@ document.addEventListener('keydown', event => {
   if (panel.hidden && event.key === 'Escape') restoreControls();
 });
 
-ghost.checked = query.get('display') === 'ghost';
-view.setGhostDisplay(ghost.checked);
 ghost.addEventListener('change', () => {
   if (ghost.checked) query.set('display', 'ghost');
   else query.delete('display');
-  view.setGhostDisplay(ghost.checked);
+  applyDisplayMode();
   syncLinks();
 });
 
